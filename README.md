@@ -134,3 +134,31 @@ Same as above, but set machine type to q35 and enable `pcie=1`:
         machine: q35
         hostpci0: 01:00,pcie=1,x-vga=on
 ```
+
+## Shutdown Script
+
+``` shell
+#!/bin/bash
+
+# get list of VMs on the node
+VMIDs=$(qm list| awk 'NR>1 {print $1}')
+
+# ask them to shutdown
+for VM in $VMIDs
+do
+    qm shutdown $VM
+done
+
+
+#wait until they're done (and down)
+for VM in $VMIDs
+do
+    while [[ "$(qm status $VM)" =~ "running" ]] ; do
+        sleep 1
+    done
+done
+
+## do the reboot
+shutdown -r now
+```
+
